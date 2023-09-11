@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>ISEGYE THEATER ADMIN</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+			}
+
+			body {
+				height: 100vh;
+				width: 100vw;
+			}
+		</style>
+	</head>
+	<body>
+		<form id="form">
+			<!--<input type="email" id="email">-->
+			<input type="text" id="email">
+			<input type="password" id="password">
+
+			<input type="submit">
+		</form>
+
+		<script>
+			const form = window['document'].getElementById('form');
+			const email = window['document'].getElementById('email');
+			const password = window['document'].getElementById('password');
+
+			function showList() {
+				form.remove();
+
+				window['document']['body']['innerHTML'] = `
+					<ul>
+						<li><a href="reports.html">reports</a></li>
+					</ul>
+				`;
+
+				return;
+			}
+
+			if(form !== null && email !== null && password !== null) {
+				if(window['localStorage'].getItem('refreshToken') === null) {
+					form.addEventListener('submit', function (submitEvent) {
+						submitEvent.preventDefault();
+
+						window.fetch('https://api.isegye.kr/auth/login', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify({
+								email: decodeURIComponent(email['value']),
+								password: decodeURIComponent(password['value'])
+							})
+						})
+						.then(function (response) {
+							return response.json();
+						})
+						.then(function (jsonResponse) {
+							alert(JSON.stringify(jsonResponse, null, 2));
+							
+							if(jsonResponse['status'] === 'success') {
+								if(jsonResponse['data']['user']['id'] === 0) {
+									localStorage.setItem('refreshToken', jsonResponse['data']['refreshToken']);
+									localStorage.setItem('accessToken', jsonResponse['data']['accessToken']);
+									showList();
+
+								} else {
+									alert('FFFF');
+								}
+							}
+							
+							return;
+						})
+						.catch(console.log);
+					
+						return;
+					});
+				} else {
+					showList();
+				}
+			}
+		</script>
+	</body>
+</html>

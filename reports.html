@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>ISEGYE THEATER ADMIN - REPORTS</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+			}
+
+			body {
+				height: 100vh;
+				width: 100vw;
+			}
+
+			table {
+				width: 100%;
+			}
+
+			button {
+				border: 0;
+				width: 18px;
+				height: 18px;
+				background-color: #ff8181;
+			}
+
+			tbody > tr > td:last-child, thead > tr > td:last-child {
+				display: flex;
+				justify-content: center;
+			}
+		</style>
+	</head>
+	<body>
+		<table>
+			<thead>
+				<tr>
+					<td>id</td>
+					<td>name / title</td>
+					<td>type</td>
+					<td>user</td>
+					<td>delete</td>
+				</tr>
+			</thead>
+			<tbody id="tableBody">
+			</tbody>
+		</table>
+
+		<script>
+			function getLink(text, url) {
+				const link = window['document'].createElement('a');
+
+				link['textContent'] = text;
+				link['href'] = url;
+
+				return link;
+			}
+
+			function getTableData(...elements) {
+				const tableData = window['document'].createElement('td');
+
+				for(let i = 0; i < elements['length']; i++) {
+					tableData.appendChild(elements[i]);
+				}
+
+				return tableData;
+			}
+
+			const tableBody = window['document'].getElementById('tableBody');
+			const refreshToken = window['localStorage'].getItem('refreshToken');
+			const accessToken = window['localStorage'].getItem('accessToken');
+			
+			if(refreshToken !== null && accessToken !== null) {
+				const urlQuery = new URLSearchParams(window['location']['search']);
+				const pageSize = urlQuery.get('page[size]');
+				const pageIndex = urlQuery.get('page[index]');
+				const reportTypes = {
+					0: '괴롭힘 및 사이버 폭력',
+					1: '개인정보 침해',
+					2: '명의 도용',
+					3: '폭력적 위협',
+					4: '보호 대상 집단에 대한 증오심 표현',
+					5: '스팸 및 사기',
+					6: '적절하지 않은 프로필 사진',
+					7: '적절하지 않은 배너 사진',
+					8: '기타',
+					
+					10: '성적인 콘텐츠',
+					11: '폭력적 또는 혐오스러운 콘텐츠',
+					12: '증오 또는 악의적인 콘텐츠',
+					13: '괴롭힘 또는 폭력',
+					14: '유해하거나 위험한 행위',
+					15: '스팸 또는 혼동을 야기하는 콘텐츠',
+					16: '법적 문제',
+					17: '기타',
+
+					20: '원치 않는 상업성 콘텐츠 또는 스팸',
+					21: '포르노 또는 음란물',
+					22: '증오심 표현 또는 노골적인 폭력',
+					23: '태러 조장',
+					24: '괴롭힘 또는 폭력',
+					25: '자살 또는 자해',
+					26: '잘못된 정보',
+					27: '기타'
+				};
+				let url = 'https://api.isegye.kr/reports?page[order]=asc';
+
+				if(pageSize !== null) {
+					url += '&page[size]=' + pageSize;
+				}
+
+				if(pageIndex !== null) {
+					url += '&page[index]=' + pageIndex;
+				}
+
+				fetch(url, {
+					headers: {
+						'Authorization': 'Bearer ' + accessToken
+					}
+				})
+				.then(function (response) {
+					return response.json();
+				})
+				.then(function (jsonResponse) {
+					if(Array.isArray(jsonResponse['data'])) {
+						for(let i = 0; i < jsonResponse['data']['length']; i++) {
+							const tableRow = window['document'].createElement('tr');
+
+							const target = {
+								url: 'https://api.isegye.kr/'
+							};
+
+							//let target;
+							
+
+							switch(jsonResponse['data'][i]['type']) {
+								case 0:
+								case 1:
+								case 2:
+								case 3:
+								case 4:
+								case 5:
+								case 6:
+								case 7:
+								case 8: {
+
+									target['url'] += 'users/' + jsonResponse['data'][i]['target']['handle'];
+									target['name'] = jsonResponse['data'][i]['target']['name'] + '(user)';
+
+									break;
+								}
+
+								case 10:
+								case 11:
+								case 12:
+								case 13:
+								case 14:
+								case 15:
+								case 16:
+								case 17: {
+									target['url'] += 'movies/' + jsonResponse['data'][i]['target']['id'];
+									target['name'] = jsonResponse['data'][i]['target']['title'] + '(movie)';
+
+									break;
+								}
+
+								case 20:
+								case 21:
+								case 22:
+								case 23:
+								case 24:
+								case 25:
+								case 26:
+								case 27: {
+									target['url'] += 'movies/' + jsonResponse['data'][i]['target']['movieId'] + '/comments?/' + jsonResponse['data'][i]['target']['id'] ;
+									target['name'] = jsonResponse['data'][i]['target']['content'] + '(movieComment)';
+
+									break;
+								}
+
+								default: {
+									alert('f');
+
+									window['location'].replace('/');
+
+									break;
+								}
+							}
+
+							tableRow.appendChild(getTableData(window['document'].createTextNode(jsonResponse['data'][i]['id'].toString(10))));
+
+							tableRow.appendChild(getTableData(getLink(target['name'], target['url'])));
+
+							tableRow.appendChild(getTableData(window['document'].createTextNode(reportTypes[jsonResponse['data'][i]['type']])));
+
+							tableRow.appendChild(getTableData(getLink(jsonResponse['data'][i]['user']['name'], 'https://api.isegye.kr/users/' + jsonResponse['data'][i]['user']['handle']), getLink('(' + jsonResponse['data'][i]['user']['email'] + ')', 'mailto:' + jsonResponse['data'][i]['user']['email'])));
+
+							const deleteButton = window['document'].createElement('button');
+
+							deleteButton['innerText'] = 'X';
+
+							deleteButton.addEventListener('click', function () {
+								fetch('https://api.isegye.kr/reports/' + jsonResponse['data'][i]['id'], {
+									method: 'DELETE',
+									headers: {
+										'Authorization': 'Bearer ' + accessToken
+									}
+								})
+								.then(function (response) {
+									if(response['status'] === 204) {
+										window['location'].reload();
+									}
+
+									return;
+								})
+								.catch(function (error) {
+									window.alert(String(error));
+									
+									return;
+								});
+								
+								return;
+							});
+
+							tableRow.appendChild(getTableData(deleteButton));
+
+							tableBody.appendChild(tableRow);
+						}
+					} else {
+						return fetch('https://api.isegye.kr/auth/token', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({
+								refreshToken: refreshToken
+							})
+						})
+						.then(function (response) {
+							return response.json();
+						})
+						.then(function (jsonResponse) {
+							if(jsonResponse['status'] === 'success' && jsonResponse['data']['user']['id'] === 0) {
+								window['localStorage'].setItem('accessToken', jsonResponse['data']['accessToken']);
+							}
+							
+							window['location'].reload();
+
+							return;
+						});
+					}
+
+					return;
+				})
+				.catch(function (error) {
+					window.alert(String(error));
+					
+					return;
+				});
+			} else {
+				window.alert('login first');
+				window['location'].replace('/');
+			}
+		</script>
+	</body>
+</html>
