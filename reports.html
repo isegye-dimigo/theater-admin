@@ -11,7 +11,7 @@
 			td {
 				white-space: break-spaces;
 			}
-			
+
 			table {
 				width: 100%;
 			}
@@ -52,7 +52,7 @@
 
 						break;
 					}
-					
+
 					case 37: {
 						if(pageIndex !== 0) {
 							location.replace('/reports.html?page[index]=' + (pageIndex - 1));
@@ -62,7 +62,7 @@
 					}
 
 				}
-				
+
 				return;
 			});
 
@@ -78,7 +78,7 @@
 					6: '적절하지 않은 프로필 사진',
 					7: '적절하지 않은 배너 사진',
 					8: '기타',
-					
+
 					10: '성적인 콘텐츠',
 					11: '폭력적 또는 혐오스러운 콘텐츠',
 					12: '증오 또는 악의적인 콘텐츠',
@@ -102,10 +102,10 @@
 					if(reports[i]['target'] !== null) {
 						const tableRow = document.createElement('tr');
 						const deleteButton = document.createElement('button');
-	
+
 						let url = 'https://api.isegye.kr/';
 						let name;
-					
+
 						switch(reports[i]['type']) {
 							case 0:
 							case 1:
@@ -118,10 +118,10 @@
 							case 8: {
 								url += 'users/' + reports[i]['target']['handle'];
 								name = reports[i]['target']['name'] + '(user)';
-	
+
 								break;
 							}
-	
+
 							case 10:
 							case 11:
 							case 12:
@@ -132,10 +132,10 @@
 							case 17: {
 								url += 'movies/' + reports[i]['target']['id'];
 								name = reports[i]['target']['title'] + '(movie)';
-	
+
 								break;
 							}
-							
+
 							case 20:
 							case 21:
 							case 22:
@@ -146,26 +146,26 @@
 							case 27: {
 								url += 'movies/' + reports[i]['target']['movieId'] + '/comments?/' + reports[i]['target']['id'];
 								name = reports[i]['target']['content'] + '(movieComment)';
-	
+
 								break;
 							}
 						}
-						
+
 						deleteButton['innerText'] = '삭제';
-	
+
 						deleteButton.addEventListener('click', function () {
 							isegye.deleteReport(reports[i]['id'])
 							.then(function () {
 								location.reload();
-	
+
 								return;
 							});
-	
+
 							return;
 						});
-	
+
 						appendChilds(tableRow, [getTableData([document.createTextNode(reports[i]['id'].toString(10))]), getTableData([getLink(url, name)]), getTableData([document.createTextNode(reportTypes[reports[i]['type']])]), getTableData([getLink('https://api.isegye.kr/users/' + reports[i]['user']['handle'], reports[i]['user']['name']), getLink('mailto:' + reports[i]['user']['email'], '(' + reports[i]['user']['email'] + ')')]), getTableData([deleteButton])]);
-	
+
 						tableBody.appendChild(tableRow);
 					}
 				}

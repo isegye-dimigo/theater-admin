@@ -27,14 +27,14 @@ class Isegye {
 		if(typeof(this['accessToken']) === 'string') {
 			this.setExpireAt(this['accessToken']);
 		}
-		
+
 		this['adminIds'] = new Set([0]);
-		
+
 		if(isValidationNeeded && !this.isAccessTokenValid()) {
 			this.updateToken()
 			.catch(alert);
 		}
-		
+
 		this['isDebug'] = location['hostname'] === 'localhost';
 	}
 
