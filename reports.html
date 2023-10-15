@@ -12,17 +12,6 @@
 				width: 100%;
 			}
 
-			button {
-				border: 0;
-				width: 18px;
-				height: 18px;
-				background-color: #ff8181;
-			}
-
-			button:hover {
-				border: 2px solid #ffc5c5;
-			}
-
 			tbody > tr > td:last-child, thead > tr > td:last-child {
 				display: flex;
 				justify-content: center;
@@ -37,7 +26,7 @@
 					<td>name / title</td>
 					<td>type</td>
 					<td>user</td>
-					<td>delete</td>
+					<td>action</td>
 				</tr>
 			</thead>
 			<tbody id="tableBody">
@@ -157,8 +146,8 @@
 								break;
 							}
 						}
-	
-						deleteButton['innerText'] = 'X';
+						
+						deleteButton['innerText'] = '삭제';
 	
 						deleteButton.addEventListener('click', function () {
 							isegye.deleteReport(reports[i]['id'])
