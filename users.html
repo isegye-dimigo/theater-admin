@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Isegye Admin - Users</title>
+		<link rel="stylesheet" href="/stylesheet/common.css">
+	</head>
+	<body>
+		<form>
+			<input type="number" id="userId" min="1">
+			<input type="checkbox" id="isVerified">
+			<input type="submit" id="submit">
+			<input type="submit" id="delete" value="삭제">
+		</form>
+		<script src="javascript/isegye.js"></script>
+		<script src="javascript/utility.js"></script>
+		<script src="javascript/common.js"></script>
+		<script>
+			const isegye = new Isegye();
+			const [userId, isVerified, submit, _delete] = getElements(['userId', 'isVerified', 'submit', 'delete']);
+
+			submit.addEventListener('click', function (event) {
+				event.preventDefault();
+
+				isegye.updateUser(userId['value'], isVerified['checked'])
+				.then(function () {
+					alert('Ok');
+
+					return;
+				})
+				.catch(alert);
+			});
+
+			_delete.addEventListener('click', function (event) {
+				event.preventDefault();
+
+				isegye.deleteUser(userId['value'])
+				.then(function () {
+					alert('Ok');
+
+					return;
+				})
+				.catch(alert);
+			});
+		</script>
+	</body>
+</html>

@@ -1,7 +1,7 @@
 /**
  * @class
  */
-class Admin {
+class Isegye {
 	/**
 	 * @private
 	 * @type {string | null}
@@ -12,10 +12,30 @@ class Admin {
 	 * @type {Set<string>}
 	 */
 	adminIds;
+	/**
+	 * @private
+	 * @type {boolean}
+	 */
+	isDebug;
 
-	constructor() {
+	/**
+   * @param {boolean} [isValidationNeeded=true]
+   */
+	constructor(isValidationNeeded = true) {
 		this['accessToken'] = localStorage.getItem('accessToken');
+
+		if(typeof(this['accessToken']) === 'string') {
+			this.setExpireAt(this['accessToken']);
+		}
+		
 		this['adminIds'] = new Set([0]);
+		
+		if(isValidationNeeded && !this.isAccessTokenValid()) {
+			this.updateToken()
+			.catch(alert);
+		}
+		
+		this['isDebug'] = location['hostname'] === 'localhost';
 	}
 
 	/**
@@ -35,11 +55,11 @@ class Admin {
 	}
 
 	/**
-	 * @private
+	 * @public
 	 * @returns {boolean}
 	 */
-	isExpireAtValid() {
-		return this['expireAt'] > Math.trunc(Date.now() / 3000);
+	isAccessTokenValid() {
+		return typeof(this['expireAt']) === 'number' && this['expireAt'] > Math.trunc(Date.now() / 1000);
 	}
 
 	/**
@@ -52,29 +72,38 @@ class Admin {
 	 * @returns {Promise<unknown>}
 	 */
 	request(path, options = {}) {
-		const url = new URL('https://api.isegye.kr' + path);
+		const _this = this;
 
 		if(typeof(this['accessToken']) === 'string') {
-			url['headers'] = {
+			options['headers'] = {
 				Authorization: 'Bearer ' + this['accessToken']
 			};
-
-			if(typeof(options['body']) === 'object') {
-				url['headers']['Content-Type'] = 'application/json';
-				url['body'] = JSON.stringify(options['body']);
-			}
 		}
 
-		if(typeof(options['method']) === 'string') {
-			url['method'] = options['method'];
+		if(typeof(options['body']) === 'object') {
+			options['headers'] = Object.assign({}, options['headers'], {
+				'Content-Type': 'application/json'
+			});
+			options['body'] = JSON.stringify(options['body']);
 		}
 
-		return fetch(url)
+		return fetch('https://api.isegye.kr' + path, options)
 		.then(function (response) {
-			return response.json();
+			if(response['status'] !== 204) {
+				return response.json();
+			} else {
+				return {
+					status: 'success',
+					data: 'undefined'
+				};
+			}
 		})
 		.then(function (responseJson) {
 			if(typeof(responseJson) === 'object' && responseJson !== null && typeof(responseJson['status']) === 'string') {
+				if(_this['isDebug']) {
+					alert(JSON.stringify(responseJson, null, 2));
+				}
+
 				switch (responseJson['status']) {
 					case 'success': {
 						return responseJson['data'];
@@ -115,7 +144,7 @@ class Admin {
 			}
 		})
 		.then(function (result) {
-			if(_this.adminIds.has(result['user']['id'])) {
+			if(_this['adminIds'].has(result['user']['id'])) {
 				_this.setExpireAt(result['accessToken']);
 				localStorage.setItem('refreshToken', result['refreshToken']);
 				localStorage.setItem('accessToken', result['accessToken']);
@@ -142,17 +171,17 @@ class Admin {
 			}
 		})
 		.then(function (result) {
-			if(_this.adminIds.has(result['user']['id'])) {
+			if(_this['adminIds'].has(result['user']['id'])) {
 				_this.setExpireAt(result['accessToken']);
 				localStorage.setItem('accessToken', result['accessToken']);
 
-				location.reload();
+				alert('If you think this is error, please refresh!');
 
 				throw new Error('AccessToken expireAt must be valid');
 			} else {
 				throw new Error('User must be admin');
 			}
-		}) : Promise.reject(new Error('User must be logged in'));
+		}) : location.replace('/'), Promise.reject(new Error('User must be logged in'));
 	}
 
 	/**
@@ -161,7 +190,7 @@ class Admin {
 	 * @returns {Promise<null>}
 	 */
 	createCategory(title) {
-		return this.isExpireAtValid() ? this.request('/admin/categories', {
+		return this.isAccessTokenValid() ? this.request('/admin/categories', {
 			method: 'POST',
 			body: {
 				title: title
@@ -175,7 +204,7 @@ class Admin {
 	 * @returns {Promise<null>}
 	 */
 	deleteMovie(movieId) {
-		return this.isExpireAtValid() ? this.request('/admin/movies/' + movieId, {
+		return this.isAccessTokenValid() ? this.request('/admin/movies/' + movieId, {
 			method: 'DELETE'
 		}) : this.updateToken();
 	}
@@ -187,7 +216,7 @@ class Admin {
 	 * @returns {Promise<void>}
 	 */
 	deleteMovieComment(movieId, movieCommentId) {
-		return this.isExpireAtValid() ? this.request('/admin/movies/' + movieId + '/comments/' + movieCommentId, {
+		return this.isAccessTokenValid() ? this.request('/admin/movies/' + movieId + '/comments/' + movieCommentId, {
 			method: 'DELETE'
 		}) : this.updateToken();
 	}
@@ -207,7 +236,7 @@ class Admin {
 	 * 	}[]>}
 	 */
 	getReports(index = 0) {
-		return this.isExpireAtValid() ? this.request('/admin/reports?page[index]=' + index) : this.updateToken();
+		return this.isAccessTokenValid() ? this.request('/admin/reports?page[order]=asc&page[index]=' + index) : this.updateToken();
 	}
 
 	/**
@@ -216,7 +245,7 @@ class Admin {
 	 * @returns {Promise<void>}
 	 */
 	deleteReport(reportId) {
-		return this.isExpireAtValid() ? this.request('/admin/reports/' + reportId, {
+		return this.isAccessTokenValid() ? this.request('/admin/reports/' + reportId, {
 			method: 'DELETE'
 		}) : this.updateToken();
 	}
@@ -227,8 +256,8 @@ class Admin {
 	 * @param {boolean} isVerified
 	 * @returns {Promise<null>}
 	 */
-	verifyUser(userId, isVerified) {
-		return this.isExpireAtValid() ? this.request('/admin/users/' + userId, {
+	updateUser(userId, isVerified) {
+		return this.isAccessTokenValid() ? this.request('/admin/users/' + userId, {
 			method: 'PATCH',
 			body: {
 				isVerified: isVerified
@@ -242,7 +271,7 @@ class Admin {
 	 * @returns {Promise<void>}
 	 */
 	deleteUser(userId) {
-		return this.isExpireAtValid() ? this.request('/admin/users/' + userId, {
+		return this.isAccessTokenValid() ? this.request('/admin/users/' + userId, {
 			method: 'DELETE'
 		}) : this.updateToken();
 	}

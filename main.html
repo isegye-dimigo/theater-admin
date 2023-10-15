@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Isegye Admin</title>
+		<link rel="stylesheet" href="/stylesheet/common.css">
+		<link rel="stylesheet" href="/stylesheet/link.css">
+		<style>
+			li {
+				margin-left: 24px;
+			}
+		</style>
+	</head>
+	<body>
+		<ul>
+			<li><a href="/categories.html">categories</a></li>
+			<li><a href="/movies.html">movies</a></li>
+			<li><a href="/movieComments.html">movieComments</a></li>
+			<li><a href="/reports.html">reports</a></li>
+			<li><a href="/users.html">users</a></li>
+		</ul>
+		<script src="/javascript/isegye.js"></script>
+		<script>
+			window.addEventListener('keydown', function (event) {
+				if(event['keyCode'] === 27) {
+					localStorage.clear();
+					location.replace('/');
+				}
+
+				return;
+			});
+
+			new Isegye();
+		</script>
+	</body>
+</html>

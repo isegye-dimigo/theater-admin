@@ -4,36 +4,28 @@
 		<meta charset="UTF-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Isegye Admin - Login</title>
+		<title>Theater Admin - MovieComments</title>
 		<link rel="stylesheet" href="/stylesheet/common.css">
 	</head>
 	<body>
 		<form id="form">
-			<input type="email" id="email">
-			<input type="password" id="password">
-
+			<input type="number" id="movieId" min="1">
+			<input type="number" id="movieCommentId" min="1">
 			<input type="submit">
 		</form>
 		<script src="javascript/isegye.js"></script>
 		<script src="javascript/utility.js"></script>
+		<script src="javascript/common.js"></script>
 		<script>
-			window.addEventListener('keydown', function (event) {
-				if(event['keyCode'] === 27) {
-					location.replace('/main.html');
-				}
-
-				return;
-			});
-
-			const isegye = new Isegye(false);
-			const [form, email, password] = getElements(['form', 'email', 'password']);
+			const isegye = new Isegye();
+			const [form, movieId, movieCommentId] = getElements(['form', 'movieId', 'movieCommentId']);
 
 			form.addEventListener('submit', function (event) {
 				event.preventDefault();
-				
-				isegye.login(email['value'], password['value'])
+
+				isegye.deleteMovieComment(movieId['value'], movieCommentId['value'])
 				.then(function () {
-					location.replace('/main.html');
+					alert('Ok');
 
 					return;
 				})
