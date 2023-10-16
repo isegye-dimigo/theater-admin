@@ -8,22 +8,34 @@
 		<link rel="stylesheet" href="/stylesheet/common.css">
 		<link rel="stylesheet" href="/stylesheet/link.css">
 		<style>
-			td {
-				white-space: break-spaces;
+			body {
+				overflow-x: auto;
 			}
 
 			table {
 				width: 100%;
+				border-spacing: 8px 0;
 			}
 
-			tbody > tr > td:last-child, thead > tr > td:last-child {
-				display: flex;
-				justify-content: center;
+			td {
+				white-space: nowrap;
+				margin: 0 10%;
+			}
+
+			td:first-child, td:last-child {
+				text-align: center;
 			}
 		</style>
 	</head>
 	<body>
 		<table>
+			<colgroup>
+				<col width="5%" />
+				<col width="40%" />
+				<col width="30%" />
+				<col width="20%" />
+				<col width="5%" />
+			</colgroup>
 			<thead>
 				<tr>
 					<td>id</td>
@@ -105,6 +117,7 @@
 
 						let url = 'https://api.isegye.kr/';
 						let name;
+						let type;
 
 						switch(reports[i]['type']) {
 							case 0:
@@ -117,7 +130,8 @@
 							case 7:
 							case 8: {
 								url += 'users/' + reports[i]['target']['handle'];
-								name = reports[i]['target']['name'] + '(user)';
+								name = reports[i]['target']['name'];
+								type = '(user)';
 
 								break;
 							}
@@ -131,7 +145,8 @@
 							case 16:
 							case 17: {
 								url += 'movies/' + reports[i]['target']['id'];
-								name = reports[i]['target']['title'] + '(movie)';
+								name = reports[i]['target']['title'];
+								type = '(movie)';
 
 								break;
 							}
@@ -145,7 +160,8 @@
 							case 26:
 							case 27: {
 								url += 'movies/' + reports[i]['target']['movieId'] + '/comments?/' + reports[i]['target']['id'];
-								name = reports[i]['target']['content'] + '(movieComment)';
+								name = reports[i]['target']['content'];
+								type = '(movieComment)';
 
 								break;
 							}
@@ -164,7 +180,13 @@
 							return;
 						});
 
-						appendChilds(tableRow, [getTableData([document.createTextNode(reports[i]['id'].toString(10))]), getTableData([getLink(url, name)]), getTableData([document.createTextNode(reportTypes[reports[i]['type']])]), getTableData([getLink('https://api.isegye.kr/users/' + reports[i]['user']['handle'], reports[i]['user']['name']), getLink('mailto:' + reports[i]['user']['email'], '(' + reports[i]['user']['email'] + ')')]), getTableData([deleteButton])]);
+						appendChilds(tableRow, [
+							getTableData([document.createTextNode(reports[i]['id'].toString(10))]),
+							getTableData([getLink(url, name), document.createTextNode(type)]),
+							getTableData([document.createTextNode(reportTypes[reports[i]['type']])]),
+							getTableData([getLink('https://api.isegye.kr/users/' + reports[i]['user']['handle'], reports[i]['user']['name']), getLink('mailto:' + reports[i]['user']['email'], '(' + reports[i]['user']['email'] + ')')]),
+							getTableData([deleteButton])
+						]);
 
 						tableBody.appendChild(tableRow);
 					}
