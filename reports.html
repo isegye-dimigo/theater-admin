@@ -56,6 +56,27 @@
 			const [tableBody] = getElements(['tableBody']);
 			const _pageIndex = Number.parseInt(new URLSearchParams(location['search']).get('page[index]'), 10);
 			const pageIndex = Number.isInteger(_pageIndex) && _pageIndex > 0 ? _pageIndex : 0;
+			let lastX = NaN;
+
+			window.addEventListener('touchstart', function (event) {
+				lastX = event['touches'][0]['clientX'];
+
+				return;
+			});
+
+			window.addEventListener('touchmove', function (event) {
+				const criteriaLength = window['innerWidth'] / 3;
+				const movedLength = lastX - event['touches'][0]['clientX'];
+				console.log(movedLength, criteriaLength)
+
+				if(movedLength < -criteriaLength) {
+					if(pageIndex !== 0) {
+						location.replace('/reports.html?page[index]=' + (pageIndex - 1));
+					}
+				} else if(movedLength > criteriaLength) {
+					location.replace('/reports.html?page[index]=' + (pageIndex + 1));
+				}
+			});
 
 			window.addEventListener('keydown', function (event) {
 				switch(event['keyCode']) {

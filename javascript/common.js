@@ -5,3 +5,9 @@ window.addEventListener('keydown', function (event) {
 
 	return;
 });
+
+window.addEventListener('dblclick', function () {
+	location.replace('/main.html');
+
+	return;
+});

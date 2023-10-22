@@ -14,17 +14,10 @@
 
 			<input type="submit">
 		</form>
+		<script src="javascript/common.js"></script>
 		<script src="javascript/isegye.js"></script>
 		<script src="javascript/utility.js"></script>
 		<script>
-			window.addEventListener('keydown', function (event) {
-				if(event['keyCode'] === 27) {
-					location.replace('/main.html');
-				}
-
-				return;
-			});
-
 			const isegye = new Isegye(false);
 			const [form, email, password] = getElements(['form', 'email', 'password']);
 
